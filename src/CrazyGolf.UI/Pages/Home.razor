@@ -24,45 +24,11 @@
                        OnClick="@(() => NavManager.NavigateTo("/setup"))"
                        Class="py-4 mb-4">
                 Start New Game
-            </MudButton>
-
-            <MudButton Variant="Variant.Outlined"
-                       Color="Color.Primary"
-                       Size="Size.Large"
-                       FullWidth="true"
-                       StartIcon="@Icons.Material.Filled.History"
-                       OnClick="ViewHistory"
-                       Class="py-4">
-                View Past Games
-            </MudButton>
-
-            @if (GameState.GameHistory.Any())
-            {
-                <MudText Typo="Typo.caption" Class="mt-4" Color="Color.Secondary">
-                    Last played: @GameState.GameHistory.Last().DatePlayed.ToShortDateString()
-                </MudText>
-            }
+            </MudButton>            
         </div>
     </MudPaper>
 </MudContainer>
 
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        // Load the history from local storage as soon as the app opens
-        await GameState.LoadHistoryAsync();
-    }
-
-    private void ViewHistory()
-    {
-        // We'll eventually need a /history page, but for now,
-        // we can navigate to the results of the last game
-        // if one exists, or show an alert.
-        if (GameState.GameHistory.Any())
-        {
-            // For now, let's just go to the setup if they want a new one
-            // or you can build a History.razor next!
-            NavManager.NavigateTo("/history");
-        }
-    }
+@code {   
+    
 }
