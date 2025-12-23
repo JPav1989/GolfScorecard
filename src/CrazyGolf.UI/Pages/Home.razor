@@ -1,0 +1,68 @@
+﻿@page "/"
+@using CrazyGolf.UI.Services
+@using MudBlazor
+@inject IGameState GameState
+@inject NavigationManager NavManager
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Elevation="8" Class="pa-8 rounded-xl">
+        <div class="d-flex flex-column align-center">
+            <MudIcon Icon="@Icons.Material.Filled.SportsGolf" Color="Color.Success" Style="font-size: 8rem;" />
+
+            <MudText Typo="Typo.h2" Align="Align.Center" Class="mb-2" Style="font-weight: 800;">
+                CRAZY GOLF
+            </MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-10" Color="Color.Secondary">
+                Digital Scorecard & Analysis
+            </MudText>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@(() => NavManager.NavigateTo("/setup"))"
+                       Class="py-4 mb-4">
+                Start New Game
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.History"
+                       OnClick="ViewHistory"
+                       Class="py-4">
+                View Past Games
+            </MudButton>
+
+            @if (GameState.GameHistory.Any())
+            {
+                <MudText Typo="Typo.caption" Class="mt-4" Color="Color.Secondary">
+                    Last played: @GameState.GameHistory.Last().DatePlayed.ToShortDateString()
+                </MudText>
+            }
+        </div>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Load the history from local storage as soon as the app opens
+        await GameState.LoadHistoryAsync();
+    }
+
+    private void ViewHistory()
+    {
+        // We'll eventually need a /history page, but for now,
+        // we can navigate to the results of the last game
+        // if one exists, or show an alert.
+        if (GameState.GameHistory.Any())
+        {
+            // For now, let's just go to the setup if they want a new one
+            // or you can build a History.razor next!
+            NavManager.NavigateTo("/history");
+        }
+    }
+}

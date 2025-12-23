@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CrazyGolf.UI/CrazyGolf.UI.csproj" />
+  <Project Path="CrazyGolf.Web/CrazyGolf.Web.csproj" />
+</Solution>
