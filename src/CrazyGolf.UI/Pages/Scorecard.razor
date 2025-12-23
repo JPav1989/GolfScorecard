@@ -6,66 +6,148 @@
 @inject NavigationManager NavManager
 @implements IDisposable
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-4">
-    @if (GameState.CurrentGame == null)
-    {
-        <MudAlert Severity="Severity.Info">No active game. Please start a new one.</MudAlert>
-        <MudButton Link="/setup" Variant="Variant.Filled" Color="Color.Primary">Go to Setup</MudButton>
+<style>
+    /* Reuse the core neon background */
+    .neon-wrapper {
+        background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #09050f 100%);
+        min-height: 100vh;
+        padding-top: 24px;
+        position: relative;
+        color: white;
     }
-    else
-    {
-        <div class="d-flex align-center justify-space-between mb-4">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIos" 
-                           Disabled="@(_currentHoleIndex == 0)" 
-                           OnClick="PreviousHole" />
-            
-            <MudText Typo="Typo.h5">Hole @(_currentHoleIndex + 1) of @GameState.CurrentGame.HoleCount</MudText>
-            
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" 
-                           Disabled="@(_currentHoleIndex == GameState.CurrentGame.HoleCount - 1)" 
-                           OnClick="NextHole" />
-        </div>
 
-        @foreach (var player in GameState.CurrentGame.Players)
-        {
-            <MudPaper Class="pa-4 mb-3 d-flex align-center justify-space-between" Elevation="2">
-                <div>
-                    <MudText Typo="Typo.h6">@player.Name</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Total: @player.TotalScore</MudText>
-                </div>
+    /* Player Scoring Card */
+    .player-card {
+        background: rgba(15, 5, 25, 0.85) !important;
+        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        border-left: 5px solid #ff00f7 !important; /* Pink accent bar */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        color: white !important;
+        transition: transform 0.2s;
+    }
 
-                <div class="d-flex align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" 
-                                   Color="Color.Error" Size="Size.Large"
-                                   OnClick="@(() => AdjustScore(player, -1))" />
-                    
-                    <MudText Typo="Typo.h4" Class="mx-4" Style="min-width: 30px; text-align: center;">
-                        @player.HoleScores[_currentHoleIndex]
-                    </MudText>
+    /* The glowing hole score */
+    .score-display {
+        font-family: 'Courier New', Courier, monospace; /* Digital look */
+        color: #39ff14;
+        text-shadow: 0 0 10px rgba(57, 255, 20, 0.8);
+        font-weight: 900;
+    }
 
-                    <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" 
-                                   Color="Color.Success" Size="Size.Large"
-                                   OnClick="@(() => AdjustScore(player, 1))" />
-                </div>
-            </MudPaper>
+    .neon-text-cyan {
+        color: #00f2ff;
+        text-shadow: 0 0 8px rgba(0, 242, 255, 0.5);
+    }
+
+    .neon-text-pink {
+        color: #ff00f7;
+        text-shadow: 0 0 8px rgba(255, 0, 247, 0.5);
+    }
+
+    /* Navigation Icons */
+    .nav-icon {
+        color: #00f2ff !important;
+    }
+
+        .nav-icon.mud-button-disabled {
+            opacity: 0.2;
         }
 
-        <div class="mt-6">
-            @if (_currentHoleIndex == GameState.CurrentGame.HoleCount - 1)
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large"
-                           OnClick="FinishGame" EndIcon="@Icons.Material.Filled.EmojiEvents">
-                    Finish Game & View Results
-                </MudButton>
-            }
-            else
-            {
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" 
-                           OnClick="NextHole">Next Hole</MudButton>
-            }
-        </div>
+    /* Buttons */
+    .btn-finish {
+        background: linear-gradient(45deg, #ff00f7, #7000ff) !important;
+        box-shadow: 0 0 20px rgba(255, 0, 247, 0.4) !important;
+        color: white !important;
     }
-</MudContainer>
+
+    .btn-next {
+        border: 1px solid #00f2ff !important;
+        color: #00f2ff !important;
+    }
+</style>
+
+<div class="neon-wrapper">
+    <MudContainer MaxWidth="MaxWidth.Small">
+        @if (GameState.CurrentGame == null)
+        {
+            <MudPaper Class="pa-6 neon-card mt-10">
+                <MudText Typo="Typo.h6" Class="neon-text-cyan mb-4">No active game detected.</MudText>
+                <MudButton Link="/setup" Variant="Variant.Filled" Class="btn-finish" FullWidth="true">
+                    Return to Mission Control
+                </MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            @* Header Navigation *@
+            <div class="d-flex align-center justify-space-between mb-6">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIos"
+                               Class="nav-icon"
+                               Disabled="@(_currentHoleIndex == 0)"
+                               OnClick="PreviousHole" />
+
+                <div class="text-center">
+                    <MudText Typo="Typo.h5" Class="neon-text-cyan" Style="font-weight: 800;">
+                        HOLE @(_currentHoleIndex + 1)
+                    </MudText>
+                    <MudText Typo="Typo.caption" Style="color: rgba(0, 242, 255, 0.6); letter-spacing: 2px;">
+                        OF @GameState.CurrentGame.HoleCount
+                    </MudText>
+                </div>
+
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos"
+                               Class="nav-icon"
+                               Disabled="@(_currentHoleIndex == GameState.CurrentGame.HoleCount - 1)"
+                               OnClick="NextHole" />
+            </div>
+
+            @* Player Cards *@
+            @foreach (var player in GameState.CurrentGame.Players)
+            {
+                <MudPaper Class="pa-4 mb-4 d-flex align-center justify-space-between player-card rounded-lg">
+                    <div>
+                        <MudText Typo="Typo.h6" Style="color: white; font-weight: 700;">@player.Name</MudText>
+                        <MudText Typo="Typo.caption" Class="neon-text-pink">
+                            TOTAL: @player.TotalScore
+                        </MudText>
+                    </div>
+
+                    <div class="d-flex align-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline"
+                                       Style="color: #ff4444;" Size="Size.Large"
+                                       OnClick="@(() => AdjustScore(player, -1))" />
+
+                        <MudText Typo="Typo.h3" Class="mx-4 score-display">
+                            @player.HoleScores[_currentHoleIndex]
+                        </MudText>
+
+                        <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
+                                       Style="color: #39ff14;" Size="Size.Large"
+                                       OnClick="@(() => AdjustScore(player, 1))" />
+                    </div>
+                </MudPaper>
+            }
+
+            @* Footer Action *@
+            <div class="mt-8 pb-10">
+                @if (_currentHoleIndex == GameState.CurrentGame.HoleCount - 1)
+                {
+                    <MudButton Variant="Variant.Filled" Class="btn-finish py-4" FullWidth="true" Size="Size.Large"
+                               OnClick="FinishGame" EndIcon="@Icons.Material.Filled.EmojiEvents">
+                        FINISH GAME
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Outlined" Class="btn-next py-3" FullWidth="true"
+                               OnClick="NextHole" EndIcon="@Icons.Material.Filled.NavigateNext">
+                        NEXT HOLE
+                    </MudButton>
+                }
+            </div>
+        }
+    </MudContainer>
+</div>
 
 @code {
     private int _currentHoleIndex = 0;

@@ -5,56 +5,134 @@
 @inject IGameState GameState
 @inject NavigationManager NavManager
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4 mb-10">
-    @if (GameState.CurrentGame == null || !GameState.CurrentGame.IsComplete)
-    {
-        <MudAlert Severity="Severity.Warning">No completed game found.</MudAlert>
-        <MudButton Link="/setup" Variant="Variant.Filled" Color="Color.Primary">Start a Game</MudButton>
+<style>
+    .neon-wrapper {
+        background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #09050f 100%);
+        min-height: 100vh;
+        padding-top: 40px;
+        padding-bottom: 80px;
+        color: white;
     }
-    else
-    {
-        <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-2">Final Standings</MudText>
-        
-        
+
+    /* Winner's Podium Card */
+    .winner-card {
+        background: linear-gradient(145deg, rgba(255, 215, 0, 0.1), rgba(255, 100, 0, 0.05)) !important;
+        border: 2px solid #FFD700 !important;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1) !important;
+        border-radius: 24px !important;
+    }
+
+    .winner-text {
+        color: #FFD700;
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+
+    /* Cyber Table Styling */
+    .neon-table {
+        background: rgba(15, 5, 25, 0.7) !important;
+        color: white !important;
+        border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    }
+
+    .neon-table th {
+        background: rgba(0, 242, 255, 0.1) !important;
+        color: #00f2ff !important;
+        font-weight: bold !important;
+        text-transform: uppercase;
+    }
+
+    .neon-table td {
+        color: white !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Chart Container */
+    .chart-paper {
+        background: rgba(15, 5, 25, 0.8) !important;
+        border: 1px solid rgba(255, 0, 247, 0.3) !important;
+    }
+
+    .section-title {
+        color: #00f2ff;
+        text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+        font-weight: 700;
+        margin-top: 2rem;
+    }
+    
+    .btn-play-again {
+        background: linear-gradient(45deg, #00f2ff, #ff00f7) !important;
+        color: white !important;
+        font-weight: 900 !important;
+        letter-spacing: 2px;
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
+    }
+</style>
+
+<div class="neon-wrapper">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        @if (GameState.CurrentGame == null || !GameState.CurrentGame.IsComplete)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mt-10" Style="color: #ff9800; border-color: #ff9800;">
+                No completed game found. Sensors indicate no data.
+            </MudAlert>
+            <MudButton Link="/setup" Variant="Variant.Filled" Class="btn-play-again mt-4" FullWidth="true">
+                INITIATE NEW GAME
+            </MudButton>
+        }
+        else
+        {
+            <MudText Typo="Typo.h3" Align="Align.Center" Class="winner-text mb-6">Final Standings</MudText>
+                        
             var winner = GameState.CurrentGame.Players.OrderBy(p => p.TotalScore).First();
-        
-        <MudPaper Class="pa-6 mb-6 d-flex flex-column align-center" Style="background-color: #FFD70022; border: 2px solid #FFD700;">
-            <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Color="Color.Warning" Size="Size.Large" />
-            <MudText Typo="Typo.h4">@winner.Name Wins!</MudText>
-            <MudText Typo="Typo.h6">Total Score: @winner.TotalScore</MudText>
-        </MudPaper>
+                        
+            @* THE WINNER PODIUM *@
+            <MudPaper Class="pa-8 mb-10 d-flex flex-column align-center winner-card">
+                <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Style="font-size: 5rem; color: #FFD700; filter: drop-shadow(0 0 10px #FFD700);" Class="mb-2" />
+                <MudText Typo="Typo.h2" Class="winner-text">@winner.Name</MudText>
+                <MudText Typo="Typo.h5" Style="color: rgba(255, 215, 0, 0.8); font-family: monospace;">
+                    SCORE: @winner.TotalScore (Champion)
+                </MudText>
+            </MudPaper>
 
-        <MudText Typo="Typo.h5" Class="mb-2">Game Progress</MudText>
-        <MudPaper Class="pa-4 mb-6">
-            <MudChart ChartType="ChartType.Line" 
-                      ChartSeries="@_series" 
-                      XAxisLabels="@_holeLabels" 
-                      Width="100%" Height="300px" 
-                      ChartOptions="@_options" />
-        </MudPaper>
+            @* GAME PROGRESS CHART *@
+            <MudText Typo="Typo.h5" Class="section-title mb-4">Performance Metrics</MudText>
+            <MudPaper Class="pa-6 mb-10 chart-paper rounded-xl">
+                <MudChart ChartType="ChartType.Line" 
+                          ChartSeries="@_series" 
+                          XAxisLabels="@_holeLabels" 
+                          Width="100%" Height="300px" 
+                          ChartOptions="@_options" />
+            </MudPaper>
 
-        <MudText Typo="Typo.h5" Class="mb-2">Player Analysis</MudText>
-        <MudTable Items="GameState.CurrentGame.Players" Hover="true" Breakpoint="Breakpoint.Sm">
-            <HeaderContent>
-                <MudTh>Player</MudTh>
-                <MudTh>Total</MudTh>
-                <MudTh>Avg/Hole</MudTh>
-                <MudTh>Best Hole</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Player">@context.Name</MudTd>
-                <MudTd DataLabel="Total">@context.TotalScore</MudTd>
-                <MudTd DataLabel="Avg">@Math.Round(context.HoleScores.Average(), 2)</MudTd>
-                <MudTd DataLabel="Best">@context.GetBestHole()</MudTd>
-            </RowTemplate>
-        </MudTable>
+            @* ANALYSIS TABLE *@
+            <MudText Typo="Typo.h5" Class="section-title mb-4">Player Analysis</MudText>
+            <MudTable Items="GameState.CurrentGame.Players" Class="neon-table rounded-lg" Elevation="0">
+                <HeaderContent>
+                    <MudTh>Player</MudTh>
+                    <MudTh>Total</MudTh>
+                    <MudTh>Avg/Hole</MudTh>
+                    <MudTh>Best Hole</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Player" Style="font-weight: bold;">@context.Name</MudTd>
+                    <MudTd DataLabel="Total" Class="neon-text-pink">@context.TotalScore</MudTd>
+                    <MudTd DataLabel="Avg">@Math.Round(context.HoleScores.Average(), 2)</MudTd>
+                    <MudTd DataLabel="Best" Style="color: #39ff14;">@context.GetBestHole()</MudTd>
+                </RowTemplate>
+            </MudTable>
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" 
-                   Class="mt-8" OnClick="@(() => NavManager.NavigateTo("/setup"))">
-            Play Again
-        </MudButton>
-    }
-</MudContainer>
+            <MudButton Variant="Variant.Filled" 
+                       Class="btn-play-again py-5 mt-12 rounded-pill" 
+                       FullWidth="true" 
+                       OnClick="@(() => NavManager.NavigateTo("/setup"))">
+                PLAY ANOTHER ROUND
+            </MudButton>
+        }
+    </MudContainer>
+</div>
 
 @code {
     private List<ChartSeries> _series = new();
