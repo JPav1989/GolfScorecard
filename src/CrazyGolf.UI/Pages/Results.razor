@@ -1,0 +1,91 @@
+﻿@page "/results"
+@using CrazyGolf.UI.Services
+@using CrazyGolf.UI.Models
+@using MudBlazor
+@inject IGameState GameState
+@inject NavigationManager NavManager
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4 mb-10">
+    @if (GameState.CurrentGame == null || !GameState.CurrentGame.IsComplete)
+    {
+        <MudAlert Severity="Severity.Warning">No completed game found.</MudAlert>
+        <MudButton Link="/setup" Variant="Variant.Filled" Color="Color.Primary">Start a Game</MudButton>
+    }
+    else
+    {
+        <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-2">Final Standings</MudText>
+        
+        
+            var winner = GameState.CurrentGame.Players.OrderBy(p => p.TotalScore).First();
+        
+        <MudPaper Class="pa-6 mb-6 d-flex flex-column align-center" Style="background-color: #FFD70022; border: 2px solid #FFD700;">
+            <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h4">@winner.Name Wins!</MudText>
+            <MudText Typo="Typo.h6">Total Score: @winner.TotalScore</MudText>
+        </MudPaper>
+
+        <MudText Typo="Typo.h5" Class="mb-2">Game Progress</MudText>
+        <MudPaper Class="pa-4 mb-6">
+            <MudChart ChartType="ChartType.Line" 
+                      ChartSeries="@_series" 
+                      XAxisLabels="@_holeLabels" 
+                      Width="100%" Height="300px" 
+                      ChartOptions="@_options" />
+        </MudPaper>
+
+        <MudText Typo="Typo.h5" Class="mb-2">Player Analysis</MudText>
+        <MudTable Items="GameState.CurrentGame.Players" Hover="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Player</MudTh>
+                <MudTh>Total</MudTh>
+                <MudTh>Avg/Hole</MudTh>
+                <MudTh>Best Hole</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Player">@context.Name</MudTd>
+                <MudTd DataLabel="Total">@context.TotalScore</MudTd>
+                <MudTd DataLabel="Avg">@Math.Round(context.HoleScores.Average(), 2)</MudTd>
+                <MudTd DataLabel="Best">@context.GetBestHole()</MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" 
+                   Class="mt-8" OnClick="@(() => NavManager.NavigateTo("/setup"))">
+            Play Again
+        </MudButton>
+    }
+</MudContainer>
+
+@code {
+    private List<ChartSeries> _series = new();
+    private string[] _holeLabels = Array.Empty<string>();
+    private ChartOptions _options = new ChartOptions { InterpolationOption = InterpolationOption.Straight };
+
+    protected override void OnInitialized()
+    {
+        if (GameState.CurrentGame != null)
+        {
+            PrepareChartData();
+        }
+    }
+
+    private void PrepareChartData()
+    {
+        var game = GameState.CurrentGame;
+        _holeLabels = Enumerable.Range(1, game.HoleCount).Select(i => i.ToString()).ToArray();
+
+        foreach (var player in game.Players)
+        {
+            // Calculate Cumulative Scores for the line chart
+            double[] runningTotal = new double[game.HoleCount];
+            int currentSum = 0;
+            for (int i = 0; i < game.HoleCount; i++)
+            {
+                currentSum += player.HoleScores[i];
+                runningTotal[i] = currentSum;
+            }
+
+            _series.Add(new ChartSeries { Name = player.Name, Data = runningTotal });
+        }
+    }
+}

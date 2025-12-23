@@ -1,0 +1,34 @@
+﻿@page "/"
+@using CrazyGolf.UI.Services
+@using MudBlazor
+@inject IGameState GameState
+@inject NavigationManager NavManager
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Elevation="8" Class="pa-8 rounded-xl">
+        <div class="d-flex flex-column align-center">
+            <MudIcon Icon="@Icons.Material.Filled.SportsGolf" Color="Color.Success" Style="font-size: 8rem;" />
+
+            <MudText Typo="Typo.h2" Align="Align.Center" Class="mb-2" Style="font-weight: 800;">
+                CRAZY GOLF
+            </MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-10" Color="Color.Secondary">
+                Digital Scorecard & Analysis
+            </MudText>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@(() => NavManager.NavigateTo("/setup"))"
+                       Class="py-4 mb-4">
+                Start New Game
+            </MudButton>            
+        </div>
+    </MudPaper>
+</MudContainer>
+
+@code {   
+    
+}
