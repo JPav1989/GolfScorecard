@@ -4,30 +4,43 @@
 @inject IGameState GameState
 @inject NavigationManager NavManager
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
-    <MudPaper Elevation="8" Class="pa-8 rounded-xl">
-        <div class="d-flex flex-column align-center">
-            <MudIcon Icon="@Icons.Material.Filled.SportsGolf" Color="Color.Success" Style="font-size: 8rem;" />
+<div class="neon-wrapper">
+    <div class="neon-grid"></div>
 
-            <MudText Typo="Typo.h2" Align="Align.Center" Class="mb-2" Style="font-weight: 800;">
-                CRAZY GOLF
-            </MudText>
-            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-10" Color="Color.Secondary">
-                Digital Scorecard & Analysis
-            </MudText>
+    <MudContainer MaxWidth="MaxWidth.Small" Style="z-index: 5;">
+        <MudPaper Elevation="0" Class="pa-10 rounded-xl neon-card">
+            <div class="d-flex flex-column align-center">
 
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Success"
-                       Size="Size.Large"
-                       FullWidth="true"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="@(() => NavManager.NavigateTo("/setup"))"
-                       Class="py-4 mb-4">
-                Start New Game
-            </MudButton>            
-        </div>
-    </MudPaper>
-</MudContainer>
+                @* Glowing Icon Container *@
+                <div class="mb-6 d-flex align-center justify-center"
+                     style="border: 3px solid #ff00f7; border-radius: 50%; width: 120px; height: 120px; box-shadow: 0 0 20px rgba(255, 0, 247, 0.4);">
+                    <MudIcon Icon="@Icons.Material.Filled.SportsGolf"
+                             Style="font-size: 5rem; color: #ff00f7; filter: drop-shadow(0 0 8px #ff00f7);" />
+                </div>
+
+                <MudText Typo="Typo.h2" Align="Align.Center" Class="neon-text-green"
+                         Style="font-weight: 900; letter-spacing: 4px;">
+                    CRAZY<span class="neon-text-pink">GOLF</span>
+                </MudText>
+
+                <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-10"
+                         Style="color: #00f2ff; letter-spacing: 2px; font-weight: 500;">
+                    YOUR HANDY SCORECARD APP
+                </MudText>
+
+                <MudButton Variant="Variant.Filled"
+                           Size="Size.Large"
+                           FullWidth="true"
+                           StartIcon="@Icons.Material.Filled.Bolt"
+                           OnClick="@(() => NavManager.NavigateTo("/setup"))"
+                           Class="py-5 rounded-lg neon-btn"
+                           Style="color: white; font-weight: 800; font-size: 1.1rem;">
+                    START ROUND
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudContainer>
+</div>
 
 @code {   
     
