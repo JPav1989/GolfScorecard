@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="CrazyGolf.App/CrazyGolf.App.csproj" Id="868ee887-5c7e-4abd-9e35-87a8e1fb783a" />
   <Project Path="CrazyGolf.UI/CrazyGolf.UI.csproj" />
   <Project Path="CrazyGolf.Web/CrazyGolf.Web.csproj" />
 </Solution>
